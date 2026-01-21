@@ -18,22 +18,22 @@ Launch file in ROS is an XML or YAML configuration that allows you to start mult
 
 ## 3. RViz screenshot
 
-![Screenshot from 2026-01-21 09-44-48.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/Screenshot%20from%202026-01-21%2009-44-48.png)
+![Screenshot from 2026-01-21 09-44-48.png](./assets/Screenshot%20from%202026-01-21%2009-44-48.png)
 
 ## 4. Runtime comparison for norm implementation
 
-![Figure_1.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/Figure_1.png)
+![Figure_1.png](./assets/Figure_1.png)
 
 
 
 ## 5. Figure_8 location and distance
 
-![locations_figure8.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/locations_figure8.png)
+![locations_figure8.png](./assets/locations_figure8.png)
 
-![distances_figure8.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/distances_figure8.png)
+![distances_figure8.png](./assets/distances_figure8.png)
 
 ## 6. Tight_figure_8 location and distance
 
-![locations_tight.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/locations_tight.png)
+![locations_tight.png](./assets/locations_tight.png)
 
-![distances_tight.png](/home/capstone/mushr_ws/src/mushr478/introduction/writeup/assets/distances_tight.png)
+![distances_tight.png](./assets/distances_tight.png)
