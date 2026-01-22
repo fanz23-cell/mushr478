@@ -1,5 +1,6 @@
 # from introduction.fibonacci import compute_fibonacci
-
+import numpy as np
+from introduction.fibonacci import compute_fibonacci
 
 def extract_fibonacci_rows(data):
     """Extract the rows of a numpy array that correspond to the Fibonacci numbers,
@@ -18,6 +19,17 @@ def extract_fibonacci_rows(data):
     """
     # BEGIN QUESTION 3.1
     "*** REPLACE THIS LINE ***"
+    
+    indices = []
+    i = 0
+    while True:
+        f = compute_fibonacci(i)   # compute the i-th Fibonacci number
+        if f >= data.shape[0]:
+            break
+        indices.append(f)
+        i += 1
+
+    return data[np.array(indices, dtype=int)]
     # END QUESTION 3.1
 
 
@@ -45,4 +57,7 @@ def increment_rows_with_odd_first_element(data):
     """
     # BEGIN QUESTION 3.2
     "*** REPLACE THIS LINE ***"
+    odd_row_mask = data [:, 0] % 2 ==1
+    data[odd_row_mask] += 1
+
     # END QUESTION 3.2
