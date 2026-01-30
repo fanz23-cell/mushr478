@@ -65,7 +65,32 @@ class KinematicCarMotionModel:
         """
         # BEGIN QUESTION 1.1
         "*** REPLACE THIS LINE ***"
-        return np.zeros_like(states, dtype=float)
+        theta = states[:, 2].astype(np.float64)
+        v = controls[:, 0].astype(np.float64)
+        delta = controls[:, 1].astype(np.float64)
+
+        dx = np.zeros_like(theta, dtype=np.float64)
+        dy = np.zeros_like(theta, dtype=np.float64)
+        dtheta = np.zeros_like(theta, dtype=np.float64)
+        
+        mask_straight = np.abs(delta) < delta_threshold
+        dx[mask_straight] = v[mask_straight] * np.cos(theta[mask_straight]) * dt
+        dy[mask_straight] = v[mask_straight] * np.sin(theta[mask_straight]) * dt
+
+        mask_turn = ~mask_straight
+        omega = (v[mask_turn] / self.car_length) * np.tan(delta[mask_turn])
+        nonzero_velocity = omega != 0
+        dx_turn = np.zeros_like(omega)
+        dy_turn = np.zeros_like(omega)
+        dx_turn[nonzero_velocity] = (v[mask_turn][nonzero_velocity] / omega[nonzero_velocity]) * \
+                                (np.sin(theta[mask_turn][nonzero_velocity] + omega[nonzero_velocity]*dt) - np.sin(theta[mask_turn][nonzero_velocity]))
+        dy_turn[nonzero_velocity] = (v[mask_turn][nonzero_velocity] / omega[nonzero_velocity]) * \
+                                (-np.cos(theta[mask_turn][nonzero_velocity] + omega[nonzero_velocity]*dt) + np.cos(theta[mask_turn][nonzero_velocity]))
+
+        dx[mask_turn] = dx_turn
+        dy[mask_turn] = dy_turn
+        dtheta[mask_turn] = omega * dt
+        return np.column_stack((dx, dy, dtheta))
         # END QUESTION 1.1
 
     def apply_motion_model(self, states, vel, delta, dt):
@@ -93,7 +118,18 @@ class KinematicCarMotionModel:
 
         # Hint: you may find the np.random.normal function useful
         # BEGIN QUESTION 1.2
-        "*** REPLACE THIS LINE ***"
+        vel_random = np.random.normal(loc=vel, scale=self.vel_std, size=n_particles)
+        delta_random = np.random.normal(loc=delta, scale=self.delta_std, size=n_particles)
+        noisy_controls = np.column_stack((vel_random, delta_random))
+        dstate = self.compute_changes(states, noisy_controls, dt)
+        states += dstate
+        states[:, 0] += np.random.normal(0, self.x_std, size=n_particles)
+        states[:, 1] += np.random.normal(0, self.y_std, size=n_particles)
+        states[:, 2] += np.random.normal(0, self.theta_std, size=n_particles)
+        
+        states[:, 2] = (states[:, 2] + np.pi) % (2 * np.pi) - np.pi
+        states[:, 2][states[:, 2] == -np.pi] = np.pi
+
         # END QUESTION 1.2
 
 
