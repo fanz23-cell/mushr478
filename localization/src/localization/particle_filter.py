@@ -44,7 +44,11 @@ class ParticleInitializer:
         n_particles = particles.shape[0]
         # Hint: use utils.quaternion_to_angle to compute the orientation theta.
         # BEGIN QUESTION 3.1
-        "*** REPLACE THIS LINE ***"
+        particles[:, 0] = np.random.normal(loc=msg.position.x, scale=self.x_std, size=n_particles)
+        particles[:, 1] = np.random.normal(loc=msg.position.y, scale=self.y_std, size=n_particles)
+        particles[:, 2] = np.random.normal(loc=utils.quaternion_to_angle(msg.orientation), scale=self.theta_std, size=n_particles)
+        particles[:, 2] = (particles[:, 2] + np.pi) % (2*np.pi) - np.pi
+        weights[:] = 1.0 / n_particles
         # END QUESTION 3.1
 
 

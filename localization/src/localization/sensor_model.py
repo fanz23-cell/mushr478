@@ -59,6 +59,7 @@ class SingleBeamSensorModel:
         You will need to normalize the table to ensure probabilities sum to 1, i.e.
         sum P(r | d) over all r should be 1, for all d.
 
+
         Args:
             max_r (int): The maximum range (in pixels)
 
@@ -77,7 +78,20 @@ class SingleBeamSensorModel:
         # Use obs_r and sim_r to vectorize the sensor model precomputation.
         diff = sim_r - obs_r
         # BEGIN QUESTION 2.1
-        "*** REPLACE THIS LINE ***"
+        p_hit = np.zeros((table_width, table_width))
+        if self.hit_std == 0:
+            p_hit[obs_r == sim_r] = 1.0
+        else:
+            p_hit = np.exp(-0.5 * np.square(diff / self.hit_std)) / np.sqrt(2.0 * np.pi * np.square(self.hit_std))
+        p_short = 2.0 * diff / np.square(sim_r)
+        p_short = np.maximum(p_short, 0.0)
+        p_short = np.nan_to_num(p_short, nan=0.0)
+        p_max = np.zeros((table_width, table_width), dtype=float)
+        p_max[table_width - 1, :] = 1.0
+        p_rand = np.full((table_width, table_width), 1.0 / table_width)
+        p_rand[table_width - 1, :] = 0.0
+        prob_table = (self.z_hit * p_hit + self.z_short * p_short + self.z_max * p_max + self.z_rand * p_rand)
+        prob_table /= prob_table.sum(axis=0, keepdims = True)
         # END QUESTION 2.1
 
         return prob_table
