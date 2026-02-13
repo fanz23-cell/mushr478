@@ -16,7 +16,9 @@ def compute_position_in_frame(p, frame):
     """
     # BEGIN QUESTION 1.2
     "*** REPLACE THIS LINE ***"
-    raise NotImplementedError
+    R = np.array([[np.cos(frame[2]),np.sin(frame[2])],[-np.sin(frame[2]),np.cos(frame[2])]])
+    p = R @ (p[:2]-frame[:2])
+    return p
     # END QUESTION 1.2
 
 
@@ -78,9 +80,12 @@ class BaseController(object):
             # path's waypoints. You may find the `argmin` method useful.
             # BEGIN QUESTION 1.1
             "*** REPLACE THIS LINE ***"
-            raise NotImplementedError
+            current_index = np.argmin(np.linalg.norm(path_xytv[:, :2] - pose[:2], axis=1)) # Find the nearest index
+            distance = np.linalg.norm(path_xytv[current_index:, :2] - pose[:2], axis=1) # Only want future
+            closest_index_offset = np.argmin(np.abs(distance - distance_lookahead)) # Find offset
+
             # END QUESTION 1.1
-            return len(path_xytv) - 1
+            return current_index + closest_index_offset
 
     def get_error(self, pose, reference_xytv):
         """Compute the error vector.
