@@ -11,7 +11,33 @@ class PIDController(BaseController):
         self.kd = kwargs.pop("kd")
 
         # Get the keyword args that we didn't consume with the above initialization
-        super(PIDController, self).__init__(**kwargs)
+        #super(PIDController, self).__init__(**kwargs)
+        # super(PIDController, self).__init__(
+        #     **{k: kwargs[k] for k in [
+        #         "frequency",
+        #         "finish_threshold",
+        #         "exceed_threshold",
+        #         "distance_lookahead",
+        #         "min_speed",
+        #     ]}
+        # )
+        self.__dict__.update({k: kwargs[k] for k in [
+            "frequency",
+            "finish_threshold",
+            "exceed_threshold",
+            "distance_lookahead",
+            "min_speed",
+        ]})
+
+        super(PIDController, self).__init__(
+            **{k: kwargs[k] for k in [
+                "frequency",
+                "finish_threshold",
+                "exceed_threshold",
+                "distance_lookahead",
+                "min_speed",
+            ]}
+        )
 
 
     def get_error(self, pose, reference_xytv):
@@ -24,6 +50,7 @@ class PIDController(BaseController):
         Returns:
             error: across-track and cross-track error
         """
+
         return compute_position_in_frame(pose, reference_xytv[:3])
 
     def get_control(self, pose, reference_xytv, error):
@@ -40,5 +67,17 @@ class PIDController(BaseController):
         """
         # BEGIN QUESTION 2.1
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+     
+        v = reference_xytv[3]
+
+        e_y = error[0]        # cross-track error
+        e_theta = error[1]    # heading error
+
+        e_y_dot = v * np.sin(pose[2]-reference_xytv[2])
+
+    # PD control law
+        delta = -self.kp * e_theta - self.kd * e_y_dot
+
+        return np.array([v, delta])
+
         # END QUESTION 2.1

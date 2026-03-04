@@ -36,12 +36,10 @@ class BaseController(object):
                 "Invalid keyword argument provided",
                 set(kwargs).difference(self.__properties),
             )
-
-        self.__dict__.update(kwargs)
-        # Error is typically going to be near this distance lookahead parameter,
-        # so if the exceed threshold is lower we'll just immediately error out
-        assert self.distance_lookahead < self.exceed_threshold
-
+        
+        for k in self.__properties:
+            setattr(self, k, kwargs[k])
+            
         self.path = None
         self.ready_event = threading.Event()
         self.path_condition = threading.Condition()

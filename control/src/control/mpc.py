@@ -63,7 +63,9 @@ class ModelPredictiveController(BaseController):
         # putting the sampled steering angles into controls.
         # BEGIN QUESTION 4.1
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        u1 = np.linspace(self.min_delta, self.max_delta, self.K)
+        controls[:, :, 1] = u1[:, None]
+
         # END QUESTION 4.1
         return controls
 
@@ -98,7 +100,9 @@ class ModelPredictiveController(BaseController):
 
         # BEGIN QUESTION 4.2
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        for t in range(self.T):
+            d1 = self.motion_model.compute_changes(rollouts[:, t, :], controls[:, t, :], dt)
+            rollouts[:, t+1, :] = rollouts[:, t, :]+d1
         # END QUESTION 4.2
         return rollouts
 
@@ -122,7 +126,9 @@ class ModelPredictiveController(BaseController):
         # the reference state
         # BEGIN QUESTION 4.3
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        state = rollouts[:, -1, :]
+        differences = np.linalg.norm(state[:,:2] - reference_xyt[:2], axis = 1)
+        return differences* self.error_w
         # END QUESTION 4.3
 
     def compute_collision_cost(self, rollouts, _):
@@ -152,7 +158,9 @@ class ModelPredictiveController(BaseController):
 
         # BEGIN QUESTION 4.3
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        states = np.reshape(rollouts, (self.K*(self.T+1),3))
+        result = np.reshape(self.check_collisions_in_map(states), (self.K,self.T+1))
+        return result.sum(axis = 1)*self.collision_w
         # END QUESTION 4.3
 
     def compute_rollout_cost(self, rollouts, reference_xyt):
@@ -197,11 +205,11 @@ class ModelPredictiveController(BaseController):
 
         # BEGIN QUESTION 4.4
         "*** REPLACE THIS LINE ***"
-        rollouts = np.zeros((self.K, self.T + 1, 3))
+        rollouts = self.get_rollout(pose,self.sampled_controls)
         # END QUESTION 4.4
         # BEGIN QUESTION 4.4
         "*** REPLACE THIS LINE ***"
-        costs = np.zeros(self.K)
+        costs = self.compute_rollout_cost(rollouts,reference_xytv)
         # END QUESTION 4.4
 
         # Set the controller's rollouts and costs (for visualization purposes).
@@ -213,7 +221,7 @@ class ModelPredictiveController(BaseController):
         # reference velocity has already been stored in self.sampled_controls.
         # BEGIN QUESTION 4.4
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        return self.sampled_controls[np.argmin(self.costs),0]
         # END QUESTION 4.4
 
 
