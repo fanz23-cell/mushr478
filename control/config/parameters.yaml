@@ -6,6 +6,5 @@ pp:
 mpc:
   K: 2
   T: 1
-mppi:
-  K: 100
-  T: 4
+  distance_lookahead: 0.1
+  use_costmap: false # Change this to use LiDAR-created costmap

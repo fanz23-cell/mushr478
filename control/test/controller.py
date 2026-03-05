@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import division
 import numpy as np
 import rosunit
@@ -50,7 +50,7 @@ class TestController(unittest.TestCase):
         )
 
     def test_get_reference_index_on_path(self):
-        straight_path_xytv = np.array([[x, 0, 0, 1] for x in range(10)], dtype=np.float)
+        straight_path_xytv = np.array([[x, 0, 0, 1] for x in range(10)], dtype=np.float64)
         pose_index = 4
         pose = straight_path_xytv[pose_index, :3]
         reference_index = self.controller.get_reference_index(
@@ -73,7 +73,7 @@ class TestController(unittest.TestCase):
         )
 
     def test_get_reference_index_near_path(self):
-        straight_path_xytv = np.array([[x, 0, 0, 1] for x in range(10)], dtype=np.float)
+        straight_path_xytv = np.array([[x, 0, 0, 1] for x in range(10)], dtype=np.float64)
         closest_index = 4
         pose = straight_path_xytv[closest_index, :3]
         pose += np.array([0.15, 0, 0])

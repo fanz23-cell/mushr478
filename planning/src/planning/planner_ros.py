@@ -31,6 +31,8 @@ class PlannerROS:
         do_shortcut=True,
         sampler_type="halton",
         cache_roadmap=False,
+        num_goals=1,
+        max_speed=1.0,
         tf_prefix="",
         tf_listener=None,
     ):
@@ -45,6 +47,7 @@ class PlannerROS:
             cache_roadmap: whether to cache the constructed roadmap
         """
         self.tf_prefix = tf_prefix
+        self.max_speed = max_speed
 
         if tf_listener:
             self.tl = tf_listener
@@ -55,6 +58,11 @@ class PlannerROS:
         self.connection_radius = connection_radius
         self.do_shortcut = do_shortcut
 
+        self.multi_goals = num_goals > 1
+        self.num_goals = num_goals
+        if self.multi_goals:
+            self.goals = []
+            self.route_sent = False
 
         self.permissible_region, self.map_info = utils.get_map("/static_map")
         self.problem = SE2Problem(
@@ -141,6 +149,20 @@ class PlannerROS:
         # Return interpolated path
         return self.rm.compute_qpath(path)
 
+    def plan_multi_goals(self, start):
+        world_points = []
+        for i, goal in enumerate(self.goals):
+            rospy.loginfo("Plan from {} to {}".format(start, goal))
+            path = self.plan_to_goal(start, goal)
+            if path is None:
+                rospy.loginfo("Failed to find a plan")
+                return None
+            world_points += [path]
+            start = goal
+        rospy.loginfo("got a plan")
+        world_points = np.concatenate(world_points, axis=0)
+        return world_points
+
 
     def get_goal(self, msg):
         """Goal callback function."""
@@ -149,8 +171,19 @@ class PlannerROS:
 
         self.goal = np.array(utils.pose_to_particle(msg.pose))
         start = self._get_car_pose()
-
-        path_states = self.plan_to_goal(start, self.goal)
+        # if not self.multi_goals:
+           path_states = self.plan_to_goal(start, self.goal)
+        if self.multi_goals:
+            if self.route_sent:
+                self.route_sent = False
+                self.goals = []
+            self.goals += [self.goal.copy()]
+            if len(self.goals) == self.num_goals:
+                rospy.loginfo("Got the final goal for mutli goal. Planning for multiple goals")
+                path_states = self.plan_multi_goals(start)
+            else:
+                rospy.loginfo("Got {}/{} goals.".format(len(self.goals), self.num_goals))
+                return False
         if path_states is None:
             return False
         return self.send_path(path_states)
@@ -183,7 +216,7 @@ class PlannerROS:
         h = Header()
         h.stamp = rospy.Time.now()
         h.frame_id = "map"
-        desired_speed = 1.0
+        desired_speed = self.max_speed
 
         path = Path()
         path.header = h
@@ -246,7 +279,7 @@ def mkdir_p(path):
     The exist_ok flag for os.makedirs was introduced in Python 3.2.
     This function provides Python 2 support.
     """
-    os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
 
 
 def graph_location(
@@ -259,9 +292,13 @@ def graph_location(
 ):
     """Return the name of this graph in the cache."""
     cache_dir = os.path.expanduser("~/.ros/graph_cache/")
-    mkdir_p(cache_dir)
+
     if map_name is None:
-        map_name, _ = os.path.splitext(os.path.basename(rospy.get_param("/map_file")))
+        map_name, _ = os.path.splitext(os.path.basename(rospy.get_param("/car/planner/map_file")))
+
+    cache_dir = os.path.join(cache_dir, map_name)
+    mkdir_p(cache_dir)
+
     params = [map_name, problem_name, sampler_name, num_vertices, connection_radius]
     if problem_name == "se2":
         params.append(curvature)
