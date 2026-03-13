@@ -59,7 +59,10 @@ def astar(rm, start, goal):
             # we'll wait for another possible parent later in the queue.
             # BEGIN QUESTION 2.2
             "*** REPLACE THIS LINE ***"
-            raise NotImplementedError
+            if entry.parent != NULL:
+                if not rm.check_edge_validity(entry.parent, entry.node):
+                    continue
+
             # END QUESTION 2.2
 
         expanded[entry.node] = True
@@ -87,7 +90,13 @@ def astar(rm, start, goal):
             # necessary to insert this QueueEntry.
             # BEGIN QUESTION 2.1
             "*** REPLACE THIS LINE ***"
-            raise NotImplementedError
+            if expanded[neighbor]:
+                continue
+
+            new_cost = entry.cost_to_come + weight
+            f = new_cost + h
+            queue.push(QueueEntry(f, next(c), neighbor, entry.node, new_cost))
+
             # END QUESTION 2.1
     raise nx.NetworkXNoPath("Node {} not reachable from {}".format(goal, start))
 
@@ -105,7 +114,14 @@ def extract_path(parents, goal):
     # Follow the parents of the node until a NULL entry is reached
     # BEGIN QUESTION 2.1
     "*** REPLACE THIS LINE ***"
-    raise NotImplementedError
+    vpath = []
+    node = goal
+    while node != NULL:
+        vpath.append(int(node))
+        node = parents[node]
+    vpath.reverse()
+    return vpath
+
     # END QUESTION 2.1
 
 
@@ -134,7 +150,18 @@ def shortcut(rm, vpath, num_trials=100):
         i, j = np.sort(indices)
         # BEGIN QUESTION 2.3
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        u = vpath[i]
+        v = vpath[j]
+
+        if not rm.check_edge_validity(u, v):
+            continue
+
+        old_len = rm.compute_path_length(vpath[i : j + 1])
+        new_len = rm.heuristic(u, v)
+
+        if new_len < old_len:
+            vpath = vpath[: i + 1] + vpath[j:]
+
         # END QUESTION 2.3
     return vpath
 

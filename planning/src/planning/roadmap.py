@@ -89,7 +89,13 @@ class Roadmap(object):
         # Hint: call the check_edge_validity method from above.
         # BEGIN QUESTION 1.3
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        valid_rows = []
+        for k in range(weighted_edges.shape[0]):
+            u, v, w = weighted_edges[k]
+            if self.check_edge_validity(int(u), int(v)):
+                valid_rows.append(k)
+        weighted_edges = weighted_edges[valid_rows, :]
+
         # END QUESTION 1.3
         return weighted_edges
 
