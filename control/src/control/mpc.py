@@ -1,10 +1,29 @@
 from __future__ import division
 import numpy as np
+import rospy
 
 from cse478 import utils
 from localization.motion_model import KinematicCarMotionModel
 from control.controller import BaseController
+from nav_msgs.msg import OccupancyGrid
 
+class CostmapListener:
+    def __init__(self, topic="/costmap_node/costmap/costmap"):
+        self.permissible_region = None
+        self.map_info = None
+        self._received = False
+
+        self.sub = rospy.Subscriber(topic, OccupancyGrid, self.callback)
+
+    def callback(self, msg):
+        data = np.array(msg.data).reshape((msg.info.height, msg.info.width))
+        # Set permissible_region - Free space in grid has value 0
+        self.permissible_region = data == 0
+        self.map_info = msg.info
+        self._received = True
+
+    def get_latest(self):
+        return self.permissible_region, self.map_info if self._received else (None, None)
 
 class ModelPredictiveController(BaseController):
     def __init__(self, **kwargs):
@@ -20,6 +39,7 @@ class ModelPredictiveController(BaseController):
             "kinematics_params",
             "permissible_region",
             "map_info",
+            "use_costmap"
         }
 
         if not self.__properties.issubset(set(kwargs)):
@@ -32,6 +52,13 @@ class ModelPredictiveController(BaseController):
         self.motion_model = KinematicCarMotionModel(
             self.car_length, **self.kinematics_params
         )
+        if self.use_costmap:
+            self.costmap_listener = CostmapListener("/costmap_node/costmap/costmap")
+            permissible_region, map_info = self.costmap_listener.get_latest()
+            if permissible_region is not None:
+                self.permissible_region = permissible_region
+                self.map_info = map_info
+
 
         super(ModelPredictiveController, self).__init__(
             **{k: kwargs[k] for k in set(kwargs) if k not in self.__properties}
@@ -199,6 +226,13 @@ class ModelPredictiveController(BaseController):
             control: np.array of velocity and steering angle
         """
         assert reference_xytv.shape[0] == 4
+
+        if self.use_costmap:
+            new_region, new_info = self.costmap_listener.get_latest()
+            if new_region is not None:
+                self.permissible_region = new_region
+                self.map_info = new_info
+                self.obstacle_map = ~self.permissible_region
 
         # Set the velocity from the reference velocity
         self.sampled_controls[:, :, 0] = reference_xytv[3]

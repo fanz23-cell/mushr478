@@ -8,7 +8,6 @@ import rospy
 import tf2_ros
 from ackermann_msgs.msg import AckermannDriveStamped
 from control.controller import time_parameterize_ramp_up_ramp_down
-from control.mppi import ModelPredictivePathIntegral
 from control.mpc import ModelPredictiveController
 from control.pid import PIDController
 from control.purepursuit import PurePursuitController
@@ -24,7 +23,6 @@ controllers = {
     "pid": PIDController,
     "pp": PurePursuitController,
     "mpc": ModelPredictiveController,
-    "mppi": ModelPredictivePathIntegral,
 }
 
 
@@ -330,6 +328,7 @@ def get_ros_params():
             "max_delta": float(rospy.get_param("~mpc/max_delta", 0.34)),
             "K": int(rospy.get_param("~mpc/K")),
             "T": int(rospy.get_param("~mpc/T")),
+            "use_costmap": bool(rospy.get_param("~mpc/use_costmap", False)),
             "kinematics_params": {
                 "vel_std": float(rospy.get_param("~motion_params/vel_std")),
                 "delta_std": float(rospy.get_param("~motion_params/delta_std")),
@@ -347,32 +346,6 @@ def get_ros_params():
         override_param(params, "~mpc/distance_lookahead", float)
         override_param(params, "~mpc/min_speed", float)
         override_param(params, "~mpc/car_length", float)
-    elif controller_type == "mppi":
-        params = {
-            "car_width": float(rospy.get_param("~mppi/car_width", 0.15)),
-            "collision_w": float(rospy.get_param("~mppi/collision_w", 1e5)),
-            "error_w": float(rospy.get_param("~mppi/error_w", 1.0)),
-            "min_delta": float(rospy.get_param("~mppi/min_delta", -0.34)),
-            "max_delta": float(rospy.get_param("~mppi/max_delta", 0.34)),
-            "K": int(rospy.get_param("~mppi/K")),
-            "T": int(rospy.get_param("~mppi/T")),
-            "kinematics_params": {
-                "vel_std": float(rospy.get_param("~motion_params/vel_std")),
-                "delta_std": float(rospy.get_param("~motion_params/delta_std")),
-                "x_std": float(rospy.get_param("~motion_params/x_std")),
-                "y_std": float(rospy.get_param("~motion_params/y_std")),
-                "theta_std": float(rospy.get_param("~motion_params/theta_std")),
-            },
-        }
-        permissible_region, map_info = utils.get_map("/static_map")
-        params["permissible_region"] = permissible_region
-        params["map_info"] = map_info
-        override_param(params, "~mppi/frequency", float)
-        override_param(params, "~mppi/finish_threshold", float)
-        override_param(params, "~mppi/exceed_threshold", float)
-        override_param(params, "~mppi/distance_lookahead", float)
-        override_param(params, "~mppi/min_speed", float)
-        override_param(params, "~mppi/car_length", float)
     else:
         raise RuntimeError(
             "'{}' is not a controller. You must specify a valid controller type".format(
