@@ -7,7 +7,7 @@
           <arg name="teleop" value="false" />
     </include>
 
-    <test pkg="control" type="controller_performance.py" test-name="controller" ns="car" time-limit="500.0">
+    <test pkg="control" type="controller_performance.py" test-name="controller" ns="car">
         <param name="type" value="$(arg type)" />
         <rosparam command="load" file="$(find control)/config/parameters.yaml" />
         <!-- Grab motion model params -->

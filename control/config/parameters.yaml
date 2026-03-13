@@ -1,11 +1,11 @@
 pid:
-  kp: 0.5
-  kd: 0.5
+  kp: 0.6
+  kd: 0.4
 pp:
-  distance_lookahead: 0.1
+  distance_lookahead: 0.2
+  #0.4 is better for anything except saw!
 mpc:
   K: 2
   T: 1
-mppi:
-  K: 100
-  T: 4
+  distance_lookahead: 0.1
+  use_costmap: false # Change this to use LiDAR-created costmap

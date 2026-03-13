@@ -56,13 +56,11 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test/pid.py)
   catkin_add_nosetests(test/purepursuit.py)
   catkin_add_nosetests(test/mpc.py)
-  catkin_add_nosetests(test/mppi.py)
 
   # add_rostest tests the ROS integrations
 
   add_rostest(test/controller_performance.test ARGS type:=pid)
   add_rostest(test/controller_performance.test ARGS type:=pp)
   add_rostest(test/controller_performance.test ARGS type:=mpc)
-  add_rostest(test/controller_performance.test ARGS type:=mppi)
 
 endif()
