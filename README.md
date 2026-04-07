@@ -1,33 +1,51 @@
-# mushr478
+# MuSHR478: Autonomous Driving on the MuSHR Platform
 
-## Usage
 
-This repository is meant to live in your ROS workspace's `src` directory. It expects to be overlaid on another workspace containing MuSHR dependency packages.
 
-## Running Tests
+https://github.com/user-attachments/assets/38d2eee8-ae72-4e07-97a7-ace7e0d90ed2
 
-Each package contains a `test` directory with unit and integration tests built with the [rosunit](https://wiki.ros.org/rosunit) framework. To run all of these tests:
 
-    catkin test
 
-If you just want to run tests for a particular package, add the package name onto the command as in this example:
+This repository contains my coursework and final system integration for **UW CSE 478: Introduction to Autonomous Robots (Winter 2026)** on the **MuSHR** platform. The project follows a full **sense-plan-act** pipeline for an Ackermann-steered robot car, covering:
 
-    catkin test introduction
+- ROS and MuSHR environment setup
+- Localization with particle filtering
+- Path tracking control
+- Sampling-based motion planning
+- Final multi-goal autonomous navigation
 
-<details>
-<summary>Advanced Test Usage</summary>
+---
 
-`catkin test` provides a summary view of all test results. You may need to see more detailed logs if you are, for instance, diagnosing why test isn't being run. To run tests for a package and see more log output:
+## Overview
 
-    roscd introduction; catkin run_tests --no-deps --this
+The goal of this repository is to build a complete autonomous navigation stack for a MuSHR car in ROS.  
+Across the quarter, the system was developed incrementally through five stages:
 
-It is possible to run tests by individual file. The command differs by the types of tests; for tests that use ROS (they start a node, usually to publish or subscribe to topics from the code under test), use `rostest` to run the launch file for the test:
+1. **Introduction**  
+   Learned the MuSHR platform, ROS workflows, publishers/subscribers, launch files, and efficient NumPy-based computation.
 
-    rostest introduction pose_listener.test --text
+2. **Localization**  
+   Implemented a particle filter with motion model, sensor model, and resampling for online state estimation.
 
-For plain Python unit tests, simply run the file:
+3. **Control**  
+   Built path tracking controllers including PID, Pure Pursuit, and MPC for Ackermann vehicle control.
 
-    python3 $(rospack find introduction)/test/norms.py
+4. **Planning**  
+   Implemented sampling-based planning components including Halton sampling, roadmap construction, Lazy A*, and path shortcutting.
 
-</details>
+5. **Final Project**  
+   Integrated localization, planning, and control into a full multi-goal autonomous driving system in a new environment.
 
+---
+
+## Repository Structure
+
+```text
+mushr478/
+├── introduction/    # ROS + NumPy warmup, basic MuSHR exercises
+├── localization/    # Particle filter localization
+├── control/         # PID / Pure Pursuit / MPC controllers
+├── planning/        # PRM-style roadmap, Lazy A*, shortcutting
+├── final/           # Final integrated multi-goal navigation setup
+├── cse478/          # Course-related support files
+└── README.md
