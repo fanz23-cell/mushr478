@@ -36,7 +36,9 @@ The navigation stack follows a classical closed-loop robotics architecture:
 
 ```mermaid
 flowchart LR
-    A[Sensors + Map] --> B[Localization]
+    A[Sensors] --> B[Localization]
+    M[Map] --> B
+    M --> C[Planning]
     B --> C[Planning]
     C --> D[Control]
     D --> E[MuSHR Car]
