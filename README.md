@@ -36,14 +36,12 @@ The navigation stack follows a classical closed-loop robotics architecture:
 
 ```mermaid
 flowchart LR
-    A[LiDAR + Odometry + Map] --> B[Localization]
-    B --> C[Estimated Vehicle Pose]
-    C --> D[Planning]
-    D --> E[Geometric Path]
-    E --> F[Control]
-    F --> G[Ackermann Commands]
-    G --> H[MuSHR Car Motion]
-    H --> A
+    A[Sensors + Map] --> B[Localization]
+    B --> C[Planning]
+    C --> D[Control]
+    D --> E[MuSHR Car]
+    E --> A
+
 ```
 
 This loop answers three core questions:
